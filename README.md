@@ -21,46 +21,50 @@ Each stage is contained in its own repository and can be run independently or as
 
 ## 🧩 Submodules Overview
 
-- **[ml-infra](https://github.com/Ben0112358/ml-infra)** → infrastructure setup (networks, shared volumes, base configs)  
+- **[ml-infra](https://github.com/Ben0112358/ml-infra)** → infrastructure setup (folders, docker network, config file with all paths etc [used in pipeline mode]) 
 - **[ml-data](https://github.com/Ben0112358/ml-data)** → data ingestion and preprocessing  
 - **[ml-training](https://github.com/Ben0112358/ml-training)** → training models on prepared data  
 - **[ml-serving](https://github.com/Ben0112358/ml-serving)** → serving trained models on endpoints  
-- **[ml-ui](https://github.com/Ben0112358/ml-ui)** → user-facing frontend connected to serving  
+- **[ml-ui](https://github.com/Ben0112358/ml-ui)** → user-facing frontend connected to serving
 
 Each subrepo has its own README with **project-specific details**.  
-This README focuses on the **big picture** and how everything ties together.
 
 ---
 
-## 🚀 Quickstart (User Perspective)
+## 🚀 Running the Pipeline
 
-1. **Clone the repositories** (or the umbrella pipeline repo if provided):  
-   ```bash
-   git clone https://github.com/Ben0112358/ml-meta
-   # Then clone the other subrepos alongside it
-   ```
+There are **two ways to run** the system:
 
-2. **Set the common base path** for all stages:  
-   ```bash
-   export ML_HOMELAB_ROOT=/absolute/path/to/ml-homelab
-   ```
+### 1. Pipeline Mode (recommended)
+- Orchestrated via [`ml-pipeline`](https://github.com/Ben0112358/ml-pipeline).  
+- Automatically handles:
+  - Docker network names
+  - Port assignments
+  - Environment variable wiring
+  - Cleanup between stages  
 
-3. **Run a stage** (containerized or Python). Examples:  
-   ```bash
-   cd ml-data
-   ./execute.sh dummy_project dev
-   ```
+Usage:
 
-4. **Chain stages together**:  
-   - `ml-data` writes processed data into `$ML_HOMELAB_ROOT`  
-   - `ml-training` consumes it and writes models into `$ML_HOMELAB_ROOT`  
-   - `ml-serving` consumes models and opens an API  
-   - `ml-ui` connects to the serving API  
+```bash
+bash execute.sh <project_name> <mode>
+```
 
-5. **Ports and networking**:  
-   - Serving endpoints are exposed on `localhost:$SERVING_PORT`  
-   - UI is exposed on `localhost:$UI_PORT`  
-   - Both must share the same `DOCKER_NETWORK_NAME`  
+Where:
+- `<project_name>` = the project you want to run  
+- `<mode>` = `prod` or `dev`  
+  - `prod` → uses the latest remote `main` branch of each subrepo  
+  - `dev` → uses your local checkout/state  
+
+This is the easiest way to run the full pipeline end-to-end. A lot of environment variables needed further down the pipeline are handled automatically by using suffixes based on `<project_name>`, `<mode>`, and the timestamp of the run.
+
+---
+
+### 2. Running without pipeline (manual)
+- Run a specific stage directly via Docker Compose or Python.  
+- You must manage environment variables (`ML_HOMELAB_ROOT`, ports, docker network) yourself.  
+- Refer to the README of each subrepo for detailed instructions.  
+
+Useful for local development and debugging individual stages.  
 
 ---
 
@@ -75,19 +79,13 @@ src/<subrepo_name>/<project>/
 tests/
 ```
 
+### Config
+- Each stage has a `config.py` file which essentially ingests environment and makes them importable.
+
 ### Adding a new project
 - Add a `<project_name>` folder in the relevant subrepo under `src/`  
 - Implement its logic (see that subrepo’s `dummy_project` for reference)  
 - Add corresponding Dockerfile + docker-compose file  
-
-### Logging & config
-- Each stage has a `config.py` for environment variables and defaults  
-- Global directories (data, models, logs) are always anchored at `$ML_HOMELAB_ROOT`  
-- Logs follow a consistent format via the shared utils  
-
-### Execution helper
-- Each subrepo provides `execute.sh` for cleanup + containerized run  
-- Runs can be prefixed with project and mode: `<project>_<mode>`  
 
 ---
 
@@ -102,20 +100,10 @@ tests/
 
 ---
 
-## 🌍 Why This Layout?
-
-- **Separation of concerns** → each stage is self-contained but composable  
-- **Flexibility** → run locally (Python) or in containers (Docker Compose)  
-- **Reusability** → swap out projects or stages without breaking the rest  
-- **Transparency** → explicit configs, minimal magic  
-
----
-
 ## 🔗 Next Steps
 
-1. Pick a subrepo (start with [ml-data](https://github.com/Ben0112358/ml-data))  
-2. Read its README for detailed usage  
-3. Run a dummy project end-to-end across the pipeline  
-4. Extend with your own project(s)  
+1. Start with [ml-pipeline](https://github.com/Ben0112358/ml-pipeline) if you want the **full orchestrated pipeline**.  
+2. Explore individual subrepos if you want to work on or debug a **specific stage**.  
+3. To add your own project, follow the developer conventions listed above.  
 
 ---
