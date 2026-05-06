@@ -11,7 +11,7 @@ Each stage is contained in its own repository and can be run independently or as
 
 ---
 
-## 📖 What This Repository Is
+## What This Repository Is
 
 - A **map of the full pipeline**: links and explanations of all submodules.  
 - **User guide**: how to set up, run, and chain stages together.  
@@ -19,7 +19,7 @@ Each stage is contained in its own repository and can be run independently or as
 
 ---
 
-## 🧩 Submodules Overview
+## Submodules Overview
 
 - **[ml-infra](https://github.com/Ben0112358/ml-infra)** → infrastructure setup (folders, docker network, config file with all paths etc [used in pipeline mode]) 
 - **[ml-data](https://github.com/Ben0112358/ml-data)** → data ingestion and preprocessing  
@@ -31,7 +31,7 @@ Each subrepo has its own README with **project-specific details**.
 
 ---
 
-## 🚀 Running the Pipeline
+## Running the Pipeline
 
 There are **two ways to run** the system:
 
@@ -68,7 +68,7 @@ Useful for local development and debugging individual stages.
 
 ---
 
-## ⚙️ Development Conventions (Dev Perspective)
+## Development Conventions (Dev Perspective)
 
 ### Folder layout
 Each subrepo follows the same pattern:
@@ -89,7 +89,7 @@ tests/
 
 ---
 
-## 🧪 Testing & CI
+## Testing & CI
 
 - Each subrepo has `tests/` with pytest-based unit tests  
 - Run tests with:  
@@ -100,7 +100,7 @@ tests/
 
 ---
 
-## 🔗 Next Steps
+## Next Steps
 
 1. Start with [ml-pipeline](https://github.com/Ben0112358/ml-pipeline) if you want the **full orchestrated pipeline**.  
 2. Explore individual subrepos if you want to work on or debug a **specific stage**.  
