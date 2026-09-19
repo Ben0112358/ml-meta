@@ -25,6 +25,7 @@ Open the workspace at `$ML_HOMELAB_ROOT/ml-meta` so project skills under `.curso
 |------|------|
 | See state of all repos | `bash scripts/status-all.sh` or skill `/status-all` |
 | Check out `main` everywhere (atomic) | skill `/checkout-main-all` — all repos must be clean with no unpushed commits |
+| Refresh python lockfiles | skill `/poetry-lock-and-sync-all` — `ml-data` … `ml-ui` only |
 | Pull `main` everywhere (atomic) | skill `/pull-all` — all repos must already be on `main` |
 | One-shot sync | `bash scripts/sync-all.sh` (= checkout-main-all then pull-all) |
 | Same branch name in N repos | skill `/branch-all` or `bash scripts/branch-all.sh <name> [repos...]` |

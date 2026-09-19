@@ -48,6 +48,7 @@ cd "$ML_HOMELAB_ROOT/ml-meta"
 bash scripts/lint-all.sh
 bash scripts/test-all.sh
 bash scripts/status-all.sh
+bash scripts/poetry-lock-and-sync-all.sh
 ```
 
-Optional repo filter: pass one or more repo names after flags, for example `bash scripts/lint-all.sh ml-data ml-training`.
+Optional repo filter: pass one or more repo names after flags, for example `bash scripts/lint-all.sh ml-data ml-training`. `poetry-lock-and-sync-all.sh` defaults to the four python stage repos only.
