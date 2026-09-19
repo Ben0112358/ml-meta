@@ -12,6 +12,26 @@ REPOS=(ml-infra ml-data ml-training ml-serving ml-ui ml-pipeline ml-meta)
 MERGE_ORDER=(ml-infra ml-data ml-training ml-serving ml-ui ml-pipeline)
 MAIN_BRANCH="main"
 
+# Untracked basenames ignored for checkout-main-all / pull-all readiness (see docs/workflows.md).
+# Do not add source, config, or lockfiles here — those should block until committed or removed.
+untracked_ok_basename() {
+	case "$1" in
+	pip-audit.json)
+		# pip-audit -o in security CI; local repro; not published
+		return 0
+		;;
+	trivy-results.sarif | opengrep.sarif)
+		# Optional SARIF outputs from security scanners; not published
+		return 0
+		;;
+	install-opengrep.sh)
+		# Ephemeral curl installer from opengrep setup; not published
+		return 0
+		;;
+	esac
+	return 1
+}
+
 # Parent of ml-meta checkout.
 _meta_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _meta_meta_root="$(cd "${_meta_script_dir}/../.." && pwd)"
@@ -156,9 +176,31 @@ git_ahead_behind() {
 	echo "${behind} ${ahead}"
 }
 
+git_has_tracked_changes() {
+	local repo_dir="$1"
+	! git -C "$repo_dir" diff-index --quiet HEAD -- 2>/dev/null ||
+		! git -C "$repo_dir" diff-index --cached --quiet HEAD -- 2>/dev/null
+}
+
+# Untracked paths that are not on the allowlist (one path per line, no trailing newline if empty).
+git_blocking_untracked() {
+	local repo_dir="$1"
+	local path base
+	while IFS= read -r path; do
+		[[ -z "$path" ]] && continue
+		base="$(basename "$path")"
+		if ! untracked_ok_basename "$base"; then
+			printf '%s\n' "$path"
+		fi
+	done < <(git -C "$repo_dir" ls-files --others --exclude-standard 2>/dev/null)
+}
+
 git_is_dirty() {
 	local repo_dir="$1"
-	[[ -n "$(git -C "$repo_dir" status --porcelain 2>/dev/null)" ]]
+	if git_has_tracked_changes "$repo_dir"; then
+		return 0
+	fi
+	[[ -n "$(git_blocking_untracked "$repo_dir" | head -n 1)" ]]
 }
 
 merge_target_ref() {
@@ -177,8 +219,14 @@ repo_ready_reason() {
 		echo "no ${MAIN_BRANCH} branch"
 		return 0
 	fi
-	if git_is_dirty "$repo_dir"; then
-		echo "dirty working tree"
+	if git_has_tracked_changes "$repo_dir"; then
+		echo "tracked changes (staged or unstaged)"
+		return 0
+	fi
+	local blocking
+	blocking="$(git_blocking_untracked "$repo_dir" | head -n 3 | tr '\n' ' ' | sed 's/ $//')"
+	if [[ -n "$blocking" ]]; then
+		echo "untracked: ${blocking}"
 		return 0
 	fi
 	if git_has_unpushed_commits "$repo_dir"; then

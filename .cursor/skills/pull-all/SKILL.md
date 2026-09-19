@@ -15,7 +15,7 @@ Wraps `scripts/pull-all.sh`. All-or-nothing: if any repo is not on `main` or not
    cd "$ML_HOMELAB_ROOT/ml-meta"
    bash scripts/pull-all.sh
    ```
-2. If blocked, report blockers. Common fix: run `/checkout-main-all` first when repos are still on a feature branch.
+2. If blocked, report blockers. Common fix: run `/checkout-main-all` first when repos are still on a feature branch. Readiness ignores allowlisted untracked artifacts only (`pip-audit.json`, SARIF/installer names in [workflows.md](../../docs/workflows.md#git-readiness-checkout-main-all--pull-all)); tracked edits and other untracked files still block.
 3. Optional: `--dry-run` or repo filter.
 
 ## Report

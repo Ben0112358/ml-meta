@@ -15,7 +15,7 @@ Wraps `scripts/checkout-main-all.sh`. All-or-nothing: if any repo is not ready, 
    cd "$ML_HOMELAB_ROOT/ml-meta"
    bash scripts/checkout-main-all.sh
    ```
-2. If blocked, list each `repo: reason` (dirty, unpushed, missing main, etc.) and suggest `/status-all` or commit/stash/push as appropriate.
+2. If blocked, list each `repo: reason` (`tracked changes`, `untracked: …`, unpushed, missing main, etc.) and suggest `/status-all` or commit/stash/push as appropriate. Untracked **allowlist** files do not block (see [workflows.md](../../docs/workflows.md#git-readiness-checkout-main-all--pull-all)): `pip-audit.json`, `trivy-results.sarif`, `opengrep.sarif`, `install-opengrep.sh`.
 3. On success, every target repo is on `main`. Does not fetch or pull; run `/pull-all` next.
 4. Optional: `--dry-run` or repo filter `[repos...]`.
 
