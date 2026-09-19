@@ -45,7 +45,7 @@ After the blocks, list repos that have unstaged changes or nothing staged, so th
 
 ### 5. Cross-repo note
 
-When several repos are being committed for one feature, state the merge order from [docs/architecture.md](../../docs/architecture.md), then point to `/pr-all-command` for pushes and PR text.
+When several repos are being committed for one feature, state the merge order from [docs/architecture.md](../../docs/architecture.md), then point to `/push-all-command` and `/pr-desc-all`.
 
 ## Output rules
 

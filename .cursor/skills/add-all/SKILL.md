@@ -69,11 +69,21 @@ Re-run the scan until it is clean or the user explicitly accepts a finding.
 
 ### 5. Report
 
-Report three sections:
+One line per repo, then a summary line, following [skill-reporting.md](../../docs/skill-reporting.md):
+
+```text
+ml-data    STAGED     4 paths
+ml-ui      NO CHANGE  nothing relevant
+unchanged: ml-infra, ml-training, ml-serving, ml-pipeline, ml-meta
+
+4 staged, 2 left out, scan clean
+```
+
+Then, below that summary, keep these details because they are the point of this skill:
 
 - **Staged** — per repo, each path with a one-line reason it belongs to this task.
 - **Not staged** — every remaining changed path with the reason (unrelated edit, generated artifact, secret, data file, work in progress).
-- **Scan result** — findings count, and what was unstaged in response.
+- **Scan result** — findings count and what was unstaged in response.
 
 Close by pointing the user to `/unstage-selected` to drop specific paths from the index, then `/commit-all-command` to commit.
 

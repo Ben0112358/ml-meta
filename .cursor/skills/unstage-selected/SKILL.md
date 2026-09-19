@@ -64,13 +64,17 @@ cd "$ML_HOMELAB_ROOT/ml-meta"
 bash scripts/scan-staged.sh
 ```
 
-Report:
+Report one line per repo, then a summary line. See [skill-reporting.md](../../docs/skill-reporting.md).
 
-- **Unstaged** — per repo, the paths removed from the index.
-- **Still staged** — what remains, per repo.
-- **Working tree** — confirm explicitly that no file contents were changed and the edits are still present.
+```text
+ml-data   UNSTAGED   2 paths (data.csv, src/tmp.py)
+ml-ui     NO CHANGE  nothing matched
+unchanged: ml-infra, ml-training, ml-serving, ml-pipeline, ml-meta
 
-If the user wanted a clean index, remind them the changes are still in the working tree and can be re-staged with `/add-all`.
+2 unstaged, 4 still staged. Working tree untouched; edits are intact.
+```
+
+List the exact paths unstaged, never globs. Always confirm the working tree was not modified. If the user wanted a clean index, remind them the changes can be re-staged with `/add-all`.
 
 ## Output rules
 

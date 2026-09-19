@@ -1,38 +1,64 @@
 ---
 name: cleanup-merged
-description: Check out main, pull, and remove local branches whose work is already on main across pipeline repositories, including squash-merged branches that git branch --merged cannot detect. Use after PRs are merged, when the user asks to clean up merged branches, or runs /cleanup-merged.
+description: Report or remove local branches whose work is already on origin/main across pipeline repositories, including squash merges. Use after PRs are merged, when repos may still be on a feature branch, or when the user runs /cleanup-merged.
 disable-model-invocation: true
 ---
 
 # cleanup-merged
 
-Wraps `scripts/cleanup-merged.sh`. The script decides what is merged; do not judge that yourself.
+Wraps `scripts/cleanup-merged.sh`. The script classifies branches; do not judge merged state yourself.
+
+## When to use
+
+After all PRs are merged. Repos may still be checked out on the same feature branch name (for example `add-orchestration-support`). That is expected.
+
+Recommended order: `/checkout-main-all` → `/pull-all` → `/cleanup-merged` (report, then `--delete` if desired).
 
 ## Instructions
 
-1. From `$ML_HOMELAB_ROOT/ml-meta`, always report first:
+1. Always report first:
    ```bash
+   cd "$ML_HOMELAB_ROOT/ml-meta"
    bash scripts/cleanup-merged.sh
    ```
-   This fetches, checks out `main`, pulls, and lists branches as `WOULD DELETE (<signal>)` or `KEEP (not merged)`. It deletes nothing.
+   - Fetches each repo, prints `was on: <branch>`.
+   - Classifies every local branch against **`origin/main` after fetch`** (not stale local `main`).
+   - **Dirty repos**: still classified; line `dirty — report only`. No checkout or delete in report mode.
+   - Output: `WOULD DELETE (<signal>)` or `KEEP (not merged)`.
 
-2. Show the user the list and the detection signal for each branch:
-   - `ancestry` — branch tip is already an ancestor of `main`
-   - `squash` — branch content matches a squash commit on `main` (patch id)
-   - `pr-merged` — GitHub reports a merged PR for the branch (only with `--gh`)
+2. Signals:
+   - `ancestry` — branch tip is an ancestor of the merge target
+   - `squash` — branch tree matches a squash commit on the merge target (patch id)
+   - `pr-merged` — GitHub merged PR for the branch (only with `--gh`)
 
-3. Delete only after the user confirms:
+3. Delete only after user confirms and working trees are clean:
    ```bash
    bash scripts/cleanup-merged.sh --delete
    ```
+   Dirty repos are **refused** for delete; clean repos checkout `main`, fast-forward toward `origin/main`, then delete merged branches.
 
-4. Scope to specific repos by appending names: `bash scripts/cleanup-merged.sh --delete ml-data ml-training`.
+4. Scope: append repo names to limit targets.
 
-5. If a branch is reported `KEEP` but the user believes its PR was merged, re-run with `--gh` to ask GitHub directly (requires a working `gh auth status`).
+5. If `KEEP` but PR was merged: run `bash scripts/cleanup-merged.sh --gh` (requires `gh auth login`), ensure fetch succeeded, run `/pull-all` so local `main` matches remote.
+
+## Report
+
+One line per repo, with its branches indented beneath, then a summary line. See [skill-reporting.md](../../docs/skill-reporting.md). Do not paste the raw script output.
+
+```text
+ml-data      OK              was on main
+  improve-isolated-run-logic   WOULD DELETE (ancestry)
+ml-meta      REPORT ONLY     dirty working tree
+  add-orchestration-support    WOULD DELETE (squash)
+
+7 repos, 7 branches would be deleted, 0 kept
+Next: bash scripts/cleanup-merged.sh --delete (after confirming)
+```
+
+Always state whether this was a report or an actual delete, and never imply a branch was removed in report mode.
 
 ## Notes
 
-- Repos with uncommitted changes are refused; report them and let the user resolve.
-- `main`, `master`, `prod`, `develop`, and `release` are never deleted.
-- Remote branches are not touched. GitHub deletes them on merge when the repo setting is enabled; otherwise give the user copyable `git push origin --delete <branch>` commands rather than running them.
-- Deleted branches remain recoverable from the reflog.
+- Protected branches: `main`, `master`, `prod`, `develop`, `release`.
+- Remote branches are not deleted here.
+- Local deletes are recoverable from the reflog.

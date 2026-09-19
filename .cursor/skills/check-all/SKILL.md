@@ -15,4 +15,20 @@ disable-model-invocation: true
    ```
 2. If lint failed on formatting-only issues, tell the user they may run `bash scripts/lint-all.sh --fix` and re-run check-all.
 3. Pass through repo filters if the user scoped the request.
-4. Report the summary counts from each script. Do not auto-fix unless the user asks.
+4. Do not auto-fix unless the user asks.
+
+## Report
+
+One line per repo covering both lint and test, then a summary line. See [skill-reporting.md](../../docs/skill-reporting.md). Do not paste raw pytest or flake8 output unless a failure needs it.
+
+```text
+ml-data       OK          lint ok, 2 tests passed
+ml-training   FAIL        flake8: 3 issues
+ml-infra      NEEDS-INIT  terraform init required
+unchanged: ml-pipeline, ml-meta
+
+lint: 5 ok, 1 failed, 1 needs-init | tests: 4 ok
+Next: bash scripts/lint-all.sh --fix ml-training
+```
+
+`NEEDS-INIT` is not a failure; say so explicitly.
