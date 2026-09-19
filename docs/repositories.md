@@ -27,10 +27,20 @@ These match each repository's CI. Cross-repo wrappers live in `$ML_HOMELAB_ROOT/
 | ml-pipeline | `shfmt -d .` | none |
 | ml-infra | `terraform fmt -check -recursive`, `terraform validate` (after local `terraform init`) | none (validate in lint) |
 
-If `lint-all` reports `NEEDS-INIT` for ml-infra, run `terraform init` in that repo (stale or missing `.terraform` modules). CI runs init before validate on every PR.
 | ml-meta | `shfmt -d .` (this repo's scripts) | none |
 
-Run everything from ml-meta:
+If `lint-all` reports `NEEDS-INIT` for ml-infra, run `terraform init` in that repo (stale or missing `.terraform` modules). CI runs init before validate on every PR.
+
+Cross-repo git helpers:
+
+```bash
+bash scripts/checkout-main-all.sh   # all repos ready → checkout main everywhere
+bash scripts/pull-all.sh            # all on main → fetch and pull
+bash scripts/sync-all.sh            # checkout-main-all then pull-all
+bash scripts/cleanup-merged.sh      # report merged local branches (see workflows.md)
+```
+
+Run lint, test, and status from ml-meta:
 
 ```bash
 cd "$ML_HOMELAB_ROOT/ml-meta"

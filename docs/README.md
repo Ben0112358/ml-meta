@@ -9,5 +9,6 @@ Read this index before changing ml-meta or any pipeline repository.
 | [conventions.md](conventions.md) | Layout, naming, formatting, tooling |
 | [workflows.md](workflows.md) | Git and cross-repo development loop |
 | [new-project.md](new-project.md) | Checklist for adding a project across stages |
+| [skill-reporting.md](skill-reporting.md) | How executing skills report results per repo |
 
 Local layout assumes all repositories are siblings under `$ML_HOMELAB_ROOT`. Scripts in [`../scripts/`](../scripts/) derive that root automatically when the env var is unset.

@@ -29,7 +29,9 @@ bash scripts/status-all.sh
 bash scripts/lint-all.sh          # black/flake8, shfmt, terraform fmt
 bash scripts/lint-all.sh --fix
 bash scripts/test-all.sh
-bash scripts/sync-all.sh --dry-run
+bash scripts/checkout-main-all.sh
+bash scripts/pull-all.sh
+bash scripts/sync-all.sh              # checkout-main-all + pull-all
 bash scripts/branch-all.sh my-feature ml-data ml-training
 bash scripts/cleanup-merged.sh    # report merged branches; --delete to remove
 bash scripts/scan-staged.sh       # flag secrets or artifacts in staged changes
@@ -39,7 +41,7 @@ Optional filter: append repo names (`ml-data`, `ml-training`, ...).
 
 ## Cursor skills
 
-With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/check-all`, `/add-all` (stages), `/unstage-selected`, `/commit-all-command`, `/pr-all-command`, `/cleanup-merged`, `/new-project`).
+With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/branch-all`, `/checkout-main-all`, `/pull-all`, `/check-all`, `/add-all`, `/unstage-selected`, `/commit-all-command`, `/push-all-command`, `/pr-desc-all`, `/cleanup-merged`, `/new-project`).
 
 ## Stage repos
 
