@@ -24,7 +24,7 @@ Open the workspace at `$ML_HOMELAB_ROOT/ml-meta` so project skills under `.curso
 | Step | Tool |
 |------|------|
 | See state of all repos | `bash scripts/status-all.sh` or skill `/status-all` |
-| Check out `main` everywhere (atomic) | skill `/checkout-main-all` — all repos must be clean with no unpushed commits |
+| Check out `main` everywhere (atomic) | skill `/checkout-main-all` — no unpushed commits; no tracked edits; see readiness below |
 | Refresh python lockfiles | skill `/poetry-lock-and-sync-all` — `ml-data` … `ml-ui` only |
 | Pull `main` everywhere (atomic) | skill `/pull-all` — all repos must already be on `main` |
 | One-shot sync | `bash scripts/sync-all.sh` (= checkout-main-all then pull-all) |
@@ -62,6 +62,26 @@ It exits non-zero on any finding. Unstage with:
 git -C "$ML_HOMELAB_ROOT/<repo>" restore --staged <path>
 ```
 
+## Git readiness (checkout-main-all / pull-all)
+
+Scripts use `scripts/lib/common.sh` (`repo_ready_reason`). A repo **blocks** when:
+
+- it has **no** local `main` branch;
+- it has **unpushed commits** on the current branch;
+- it has **tracked** changes (staged or unstaged vs `HEAD`);
+- it has **untracked** files that are not on the allowlist below.
+
+**Allowed untracked files** (safe to ignore; do not belong on GitHub). Basename must match; defined in `untracked_ok_basename()` in `common.sh`:
+
+| Basename | Why it is disregarded |
+|----------|------------------------|
+| `pip-audit.json` | Local or CI `pip-audit -o` output from the security workflow; scan report only |
+| `trivy-results.sarif` | Filesystem Trivy SARIF when generated locally; not part of the repo |
+| `opengrep.sarif` | Opengrep SARIF when generated locally; not part of the repo |
+| `install-opengrep.sh` | One-off installer script from opengrep setup; not project source |
+
+Anything else untracked (new `.py`, `.toml`, `.env`, etc.) still blocks until you commit, delete, or add to `.gitignore` locally. Prefer committing real work; use `.gitignore` for recurring local junk when the allowlist is not enough.
+
 ## Post-merge (PRs merged, may still be on feature branch)
 
 Typical sequence:
@@ -70,8 +90,8 @@ Typical sequence:
 /status-all  →  /checkout-main-all  →  /pull-all  →  /cleanup-merged
 ```
 
-1. **checkout-main-all** — If every repo is clean and has no unpushed commits, check out `main` in all of them. If any repo fails the gate, nothing is checked out.
-2. **pull-all** — If every repo is on `main` and still ready, fetch and `pull --ff-only` everywhere. If any repo is not on `main`, nothing is pulled (run checkout-main-all first).
+1. **checkout-main-all** — If every repo passes [git readiness](#git-readiness-checkout-main-all--pull-all), check out `main` in all of them. If any repo fails the gate, nothing is checked out.
+2. **pull-all** — If every repo is on `main` and passes the same readiness gate, fetch and `pull --ff-only` everywhere. If any repo is not on `main`, nothing is pulled (run checkout-main-all first).
 3. **cleanup-merged** — Report which local branches are already on `origin/main` (see below). Use `--delete` only when working trees are clean.
 
 `sync-all.sh` runs checkout-main-all then pull-all in one command. Prefer the split steps when you want to inspect state between them.
