@@ -31,7 +31,7 @@ Docker Compose files in each stage load that file via `env_file`. Python stages 
 
 ## Orchestration (ml-pipeline)
 
-`execute.sh` is the **end-to-end integration test** for the modular pipeline: infra through UI in one disposable run. Per-repo pytest and lint cover units; this script validates cross-repo behavior together.
+`execute.sh` runs the modular pipeline end to end (infra through UI) in one disposable run. Per-repo pytest and lint cover units; **`dev`** mode is the cross-repo **integration test** you run before merging related PRs.
 
 Entry point (from `$ML_HOMELAB_ROOT/ml-pipeline`):
 
@@ -42,10 +42,10 @@ bash execute.sh <project_name> <prod|dev>
 
 | Mode | Role |
 |------|------|
-| **dev** | **Local integration test** — `setup.sh` copies your sibling checkouts from `$ML_HOMELAB_ROOT/<repo>` (feature-branch state on disk). Run before merging related PRs. |
-| **prod** | **Main integration test** — `setup.sh` clones each stage repo's remote **`main`**. Simulates "only merged code exists"; can fail until every related PR is on `main`. |
+| **dev** | **Integration test (local)** — `setup.sh` copies your sibling checkouts from `$ML_HOMELAB_ROOT/<repo>` (feature-branch state on disk). Run before merging related PRs. |
+| **prod** | **Compose from GitHub `main`** — `setup.sh` clones each stage repo's remote **`main`**. Checks that published code on each repo works together; can fail until every related PR is merged. Not a pre-merge integration test and not production hosting. |
 
-Script flags stay `dev` and `prod`; in prose you can read them as **local-run** vs **main-run**. Neither mode is a long-lived dev environment or production SLO tier.
+Script flags stay `dev` and `prod`. In prose, **dev** is **local-run**; **prod** is **main-run** (remote `main` only). Neither flag means a long-lived dev environment or a production SLO tier.
 
 Ports for serving and UI are derived from `md5("${PROJECT}_${MODE}")`: serving uses the base port, UI uses base + 1.
 
@@ -59,7 +59,7 @@ Changes that alter model loading or training artifacts should land in **ml-train
 
 ## Atomicity
 
-There is no single commit or single PR across repositories. The **main-run** (`prod`) integration test composes each stage's `main` independently, so mismatched merges can produce a broken pipeline until all related PRs are merged. Use the **local-run** (`dev`) integration test to validate a cross-repo feature from local checkouts before merging.
+There is no single commit or single PR across repositories. **`prod`** composes each stage's remote **`main`** independently, so mismatched merges can produce a broken pipeline until all related PRs are merged. Use **`dev`** to integration-test a cross-repo feature from local checkouts before merging.
 
 Recommended merge order when a feature spans multiple repos:
 
