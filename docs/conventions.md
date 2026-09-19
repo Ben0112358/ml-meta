@@ -30,7 +30,7 @@ Each stage exposes a `config.py` that reads environment variables (including `ML
 
 - Python 3.12+
 - Poetry for dependencies
-- Black and flake8, line length **79** (configured in each repo's `pyproject.toml`)
+- Black line length **79** in each repo's `pyproject.toml`; flake8 **79** via `.flake8` (`max-line-length`)
 - Tests with pytest under `tests/`
 
 ## Bash (ml-pipeline, ml-meta scripts)
