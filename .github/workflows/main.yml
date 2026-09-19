@@ -1,0 +1,21 @@
+name: bash linting check via shfmt
+
+on:
+  pull_request:
+    paths:
+      - "**/*.sh"
+      - ".github/workflows/main.yml"
+
+jobs:
+  shfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt
+
+      - name: Run shfmt check
+        run: shfmt -d .

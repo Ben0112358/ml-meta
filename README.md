@@ -1,109 +1,54 @@
 # ml-meta
 
-`ml-meta` is the **overview and entrypoint** for the entire ML pipeline ecosystem.  
-It ties together the other sub-repositories into a **modular, end-to-end ML system**:
+Overview and development control plane for the modular ML pipeline. Pipeline repositories are independent Git checkouts under `$ML_HOMELAB_ROOT`:
 
 ```
 ml-infra → ml-data → ml-training → ml-serving → ml-ui
 ```
 
-Each stage is contained in its own repository and can be run independently or as part of the full pipeline.  
+Orchestration: [`ml-pipeline`](https://github.com/Ben0112358/ml-pipeline) (`bash execute.sh <project> prod|dev`).
 
----
+## Documentation
 
-## What This Repository Is
+Start at [docs/README.md](docs/README.md):
 
-- A **map of the full pipeline**: links and explanations of all submodules.  
-- **User guide**: how to set up, run, and chain stages together.  
-- **Developer guide**: conventions, project structure, and how to extend the system.  
+- [Architecture](docs/architecture.md)
+- [Repositories](docs/repositories.md)
+- [Conventions](docs/conventions.md)
+- [Workflows](docs/workflows.md)
+- [New project checklist](docs/new-project.md)
 
----
+Agent-oriented rules: [AGENTS.md](AGENTS.md).
 
-## Submodules Overview
+## Cross-repo scripts
 
-- **[ml-infra](https://github.com/Ben0112358/ml-infra)** → infrastructure setup (folders, docker network, config file with all paths etc [used in pipeline mode]) 
-- **[ml-data](https://github.com/Ben0112358/ml-data)** → data ingestion and preprocessing  
-- **[ml-training](https://github.com/Ben0112358/ml-training)** → training models on prepared data  
-- **[ml-serving](https://github.com/Ben0112358/ml-serving)** → serving trained models on endpoints  
-- **[ml-ui](https://github.com/Ben0112358/ml-ui)** → user-facing frontend connected to serving
-
-Each subrepo has its own README with **project-specific details**.  
-
----
-
-## Running the Pipeline
-
-There are **two ways to run** the system:
-
-### 1. Pipeline Mode (recommended)
-- Orchestrated via [`ml-pipeline`](https://github.com/Ben0112358/ml-pipeline).  
-- Automatically handles:
-  - Docker network names
-  - Port assignments
-  - Environment variable wiring
-  - Cleanup between stages  
-
-Usage:
+From this repository:
 
 ```bash
-bash execute.sh <project_name> <mode>
+bash scripts/status-all.sh
+bash scripts/lint-all.sh          # black/flake8, shfmt, terraform fmt
+bash scripts/lint-all.sh --fix
+bash scripts/test-all.sh
+bash scripts/sync-all.sh --dry-run
+bash scripts/branch-all.sh my-feature ml-data ml-training
+bash scripts/cleanup-merged.sh    # report merged branches; --delete to remove
+bash scripts/scan-staged.sh       # flag secrets or artifacts in staged changes
 ```
 
-Where:
-- `<project_name>` = the project you want to run  
-- `<mode>` = `prod` or `dev`  
-  - `prod` → uses the latest remote `main` branch of each subrepo  
-  - `dev` → uses your local checkout/state  
+Optional filter: append repo names (`ml-data`, `ml-training`, ...).
 
-This is the easiest way to run the full pipeline end-to-end. A lot of environment variables needed further down the pipeline are handled automatically by using suffixes based on `<project_name>`, `<mode>`, and the timestamp of the run.
+## Cursor skills
 
----
+With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/check-all`, `/add-all` (stages), `/unstage-selected`, `/commit-all-command`, `/pr-all-command`, `/cleanup-merged`, `/new-project`).
 
-### 2. Running without pipeline (manual)
-- Run a specific stage directly via Docker Compose or Python.  
-- You must manage environment variables (`ML_HOMELAB_ROOT`, ports, docker network) yourself.  
-- Refer to the README of each subrepo for detailed instructions.  
+## Stage repos
 
-Useful for local development and debugging individual stages.  
+| Repo | Role |
+|------|------|
+| [ml-infra](https://github.com/Ben0112358/ml-infra) | Terraform, paths, docker network |
+| [ml-data](https://github.com/Ben0112358/ml-data) | Ingest and clean data |
+| [ml-training](https://github.com/Ben0112358/ml-training) | Train models |
+| [ml-serving](https://github.com/Ben0112358/ml-serving) | HTTP serving |
+| [ml-ui](https://github.com/Ben0112358/ml-ui) | UI |
 
----
-
-## Development Conventions (Dev Perspective)
-
-### Folder layout
-Each subrepo follows the same pattern:
-```
-docker-compose.<project>.yaml
-Dockerfile.<project>
-src/<subrepo_name>/<project>/
-tests/
-```
-
-### Config
-- Each stage has a `config.py` file which essentially ingests environment and makes them importable.
-
-### Adding a new project
-- Add a `<project_name>` folder in the relevant subrepo under `src/`  
-- Implement its logic (see that subrepo’s `dummy_project` for reference)  
-- Add corresponding Dockerfile + docker-compose file  
-
----
-
-## Testing & CI
-
-- Each subrepo has `tests/` with pytest-based unit tests  
-- Run tests with:  
-  ```bash
-  poetry run pytest
-  ```  
-- Future CI/CD integration will run these automatically  
-
----
-
-## Next Steps
-
-1. Start with [ml-pipeline](https://github.com/Ben0112358/ml-pipeline) if you want the **full orchestrated pipeline**.  
-2. Explore individual subrepos if you want to work on or debug a **specific stage**.  
-3. To add your own project, follow the developer conventions listed above.  
-
----
+Each stage README has run instructions for manual mode.
