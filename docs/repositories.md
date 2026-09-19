@@ -20,13 +20,13 @@ These match each repository's CI. Cross-repo wrappers live in `$ML_HOMELAB_ROOT/
 
 | Repository | Lint (check) | Test | Security (CI) |
 |------------|--------------|------|----------------|
-| ml-data | `black --check .`, `flake8 .` | `poetry run pytest` | Gitleaks, CodeQL, Bandit, pip-audit |
+| ml-data | `black --check .`, `flake8 .` | `poetry run pytest` | Gitleaks, Trivy (HIGH/CRITICAL), CodeQL, Bandit (HIGH+), pip-audit (HIGH/CRITICAL via OSV) |
 | ml-training | same | same | same |
 | ml-serving | same | same | same |
 | ml-ui | same | same | same |
-| ml-pipeline | `shfmt -d .` (path-filtered on PR) | none | Gitleaks |
-| ml-infra | `terraform fmt -check -recursive`, `terraform validate` (after local `terraform init`) | none (validate in lint) | Gitleaks |
-| ml-meta | `shfmt -d .` (path-filtered on PR) | none | Gitleaks |
+| ml-pipeline | `shfmt -d .` (path-filtered on PR) | none | Gitleaks, Trivy (HIGH/CRITICAL) |
+| ml-infra | `terraform fmt -check -recursive`, `terraform validate` (after local `terraform init`) | none (validate in lint) | Gitleaks, Trivy (HIGH/CRITICAL) |
+| ml-meta | `shfmt -d .` (path-filtered on PR) | none | Gitleaks, Trivy (HIGH/CRITICAL) |
 
 Python stage repos use Poetry on **3.13** in CI. Dependabot opens weekly grouped PRs for pip and GitHub Actions (python repos) or Actions only (bash/terraform/meta). For a fuller security reference (Trivy, Opengrep), see sibling repo `llm-decision-spec` under `$ML_HOMELAB_ROOT`.
 
