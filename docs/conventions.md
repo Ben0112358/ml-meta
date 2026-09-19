@@ -28,8 +28,10 @@ Each stage exposes a `config.py` that reads environment variables (including `ML
 
 ## Python formatting and lint
 
-- Python 3.12+
-- Poetry for dependencies
+- Python **3.13** band: `>=3.13,<3.14` in each stage repo's `pyproject.toml`
+- Poetry for dependencies; use `poetry install --sync` to match the lockfile
+- Stage repos run **lint**, **test**, and **security** GitHub workflows on pull requests (and on push to `main` where configured)
+- **Security CI policy (all pipeline repos):** jobs fail on **HIGH/CRITICAL** findings where the tool supports severity (Trivy, Bandit `-lll`, pip-audit via OSV severity). Gitleaks always fails on detected secrets. Fix or bump dependencies for actionable HIGH issues; lower severities are reported in logs but do not block merge.
 - Black line length **79** in each repo's `pyproject.toml`; flake8 **79** via `.flake8` (`max-line-length`)
 - Tests with pytest under `tests/`
 

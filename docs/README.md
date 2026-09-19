@@ -12,3 +12,5 @@ Read this index before changing ml-meta or any pipeline repository.
 | [skill-reporting.md](skill-reporting.md) | How executing skills report results per repo |
 
 Local layout assumes all repositories are siblings under `$ML_HOMELAB_ROOT`. Scripts in [`../scripts/`](../scripts/) derive that root automatically when the env var is unset.
+
+Pipeline Python repos run lint, test, and security workflows in GitHub Actions. The sibling checkout `llm-decision-spec` (same homelab root, not managed by ml-meta scripts) documents a similar but fuller security stack (for example Trivy and Opengrep) for comparison.
