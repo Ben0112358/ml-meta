@@ -10,6 +10,7 @@ _meta_common_loaded=1
 
 REPOS=(ml-infra ml-data ml-training ml-serving ml-ui ml-pipeline ml-meta)
 MERGE_ORDER=(ml-infra ml-data ml-training ml-serving ml-ui ml-pipeline)
+MAIN_BRANCH="main"
 
 # Parent of ml-meta checkout.
 _meta_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -158,6 +159,39 @@ git_ahead_behind() {
 git_is_dirty() {
 	local repo_dir="$1"
 	[[ -n "$(git -C "$repo_dir" status --porcelain 2>/dev/null)" ]]
+}
+
+merge_target_ref() {
+	local repo_dir="$1"
+	if git -C "$repo_dir" show-ref --verify --quiet "refs/remotes/origin/${MAIN_BRANCH}"; then
+		echo "origin/${MAIN_BRANCH}"
+	else
+		echo "${MAIN_BRANCH}"
+	fi
+}
+
+# Prints a non-empty reason when not ready, else empty.
+repo_ready_reason() {
+	local repo_dir="$1"
+	if ! git -C "$repo_dir" show-ref --verify --quiet "refs/heads/${MAIN_BRANCH}"; then
+		echo "no ${MAIN_BRANCH} branch"
+		return 0
+	fi
+	if git_is_dirty "$repo_dir"; then
+		echo "dirty working tree"
+		return 0
+	fi
+	if git_has_unpushed_commits "$repo_dir"; then
+		echo "unpushed commits"
+		return 0
+	fi
+	echo ""
+}
+
+repo_ready_for_pull() {
+	local reason
+	reason="$(repo_ready_reason "$1")"
+	[[ -z "$reason" ]]
 }
 
 git_has_unpushed_commits() {

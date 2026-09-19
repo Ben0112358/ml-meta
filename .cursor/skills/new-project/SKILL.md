@@ -28,3 +28,19 @@ disable-model-invocation: true
 7. Remind the user to validate with `bash execute.sh <project_name> dev` from `ml-pipeline` when ready.
 
 Do not commit or push unless the user explicitly asks.
+
+## Report
+
+One line per repo scaffolded, then a summary line. See [skill-reporting.md](../../docs/skill-reporting.md).
+
+```text
+ml-data       OK     src/ml_data/<project>/ + Dockerfile + compose
+ml-training   OK     src/ml_training/<project>/ + Dockerfile + compose
+ml-serving    OK     ...
+ml-ui         FAIL   destination already exists
+
+3 ok, 1 failed. Lint: 4 ok. Tests: 4 ok.
+Next: implement logic and add tests, then bash execute.sh <project> dev
+```
+
+State clearly that business logic is still a copy of `dummy_project` and needs real implementation.

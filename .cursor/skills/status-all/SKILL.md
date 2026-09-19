@@ -13,5 +13,18 @@ disable-model-invocation: true
    bash scripts/status-all.sh
    ```
 2. If the user named specific repos, append them: `bash scripts/status-all.sh ml-data ml-training`.
-3. Summarize which repos are dirty, ahead of upstream, or missing.
-4. Do not modify any repository.
+3. Do not modify any repository.
+
+## Report
+
+One line per repo, then a summary line. See [skill-reporting.md](../../docs/skill-reporting.md). Do not paste the raw script output.
+
+```text
+ml-data    OK         main, clean
+ml-meta    DIRTY      1 unstaged, 20 untracked
+unchanged: ml-infra, ml-training, ml-serving, ml-ui, ml-pipeline
+
+6 clean, 1 dirty, 0 ahead of upstream
+```
+
+Call out anything actionable: dirty trees, branches ahead or behind upstream, missing checkouts.

@@ -24,6 +24,7 @@ Act as a senior engineer working across the pipeline repositories. This reposito
 - `git commit`, `git push`, and `gh pr create` must be emitted as copyable commands only, never executed, unless the user explicitly asks.
 - Treat staged content as about to become public; never stage secrets, state files, data or model artifacts, or absolute home paths.
 - Skills that wrap scripts should execute the script and summarize results.
+- Any skill that executes something must report one short line per repository plus a summary line, following [docs/skill-reporting.md](docs/skill-reporting.md). Do not paste raw script output. Skills that only emit copyable commands are exempt.
 
 ## Cross-repo features
 
