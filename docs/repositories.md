@@ -14,20 +14,21 @@ All paths below are under `$ML_HOMELAB_ROOT`. Set that variable to the directory
 
 Non-repository directories often present under the same root (for example `data/`, `logs/`, `models/`, `configs/`) are runtime or local artifacts, not separate Git repos.
 
-## Lint and test (per repo)
+## Lint, test, and security (per repo)
 
 These match each repository's CI. Cross-repo wrappers live in `$ML_HOMELAB_ROOT/ml-meta/scripts/`.
 
-| Repository | Lint (check) | Test |
-|------------|--------------|------|
-| ml-data | `black --check .`, `flake8 .` | `poetry run pytest` |
-| ml-training | same | same |
-| ml-serving | same | same |
-| ml-ui | same | same |
-| ml-pipeline | `shfmt -d .` | none |
-| ml-infra | `terraform fmt -check -recursive`, `terraform validate` (after local `terraform init`) | none (validate in lint) |
+| Repository | Lint (check) | Test | Security (CI) |
+|------------|--------------|------|----------------|
+| ml-data | `black --check .`, `flake8 .` | `poetry run pytest` | Gitleaks, CodeQL, Bandit, pip-audit |
+| ml-training | same | same | same |
+| ml-serving | same | same | same |
+| ml-ui | same | same | same |
+| ml-pipeline | `shfmt -d .` (path-filtered on PR) | none | Gitleaks |
+| ml-infra | `terraform fmt -check -recursive`, `terraform validate` (after local `terraform init`) | none (validate in lint) | Gitleaks |
+| ml-meta | `shfmt -d .` (path-filtered on PR) | none | Gitleaks |
 
-| ml-meta | `shfmt -d .` (this repo's scripts) | none |
+Python stage repos use Poetry on **3.13** in CI. Dependabot opens weekly grouped PRs for pip and GitHub Actions (python repos) or Actions only (bash/terraform/meta). For a fuller security reference (Trivy, Opengrep), see sibling repo `llm-decision-spec` under `$ML_HOMELAB_ROOT`.
 
 If `lint-all` reports `NEEDS-INIT` for ml-infra, run `terraform init` in that repo (stale or missing `.terraform` modules). CI runs init before validate on every PR.
 
