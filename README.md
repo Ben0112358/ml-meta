@@ -29,6 +29,7 @@ bash scripts/status-all.sh
 bash scripts/lint-all.sh          # black/flake8, shfmt, terraform fmt
 bash scripts/lint-all.sh --fix
 bash scripts/test-all.sh
+bash scripts/poetry-lock-and-sync-all.sh   # poetry lock + sync in python stage repos
 bash scripts/checkout-main-all.sh
 bash scripts/pull-all.sh
 bash scripts/sync-all.sh              # checkout-main-all + pull-all
@@ -41,7 +42,7 @@ Optional filter: append repo names (`ml-data`, `ml-training`, ...).
 
 ## Cursor skills
 
-With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/branch-all`, `/checkout-main-all`, `/pull-all`, `/check-all`, `/add-all`, `/unstage-selected`, `/commit-all-command`, `/push-all-command`, `/pr-desc-all`, `/cleanup-merged`, `/new-project`).
+With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/branch-all`, `/checkout-main-all`, `/pull-all`, `/check-all`, `/poetry-lock-and-sync-all`, `/add-all`, `/unstage-selected`, `/commit-all-command`, `/push-all-command`, `/pr-desc-all`, `/cleanup-merged`, `/new-project`).
 
 ## Stage repos
 
