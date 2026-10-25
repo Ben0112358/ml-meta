@@ -36,13 +36,14 @@ bash scripts/sync-all.sh              # checkout-main-all + pull-all
 bash scripts/branch-all.sh my-feature ml-data ml-training
 bash scripts/cleanup-merged.sh    # report merged branches; --delete to remove
 bash scripts/scan-staged.sh       # flag secrets or artifacts in staged changes
+bash scripts/ml.sh status         # also path, term, open, task; see docs/workflows.md
 ```
 
 Optional filter: append repo names (`ml-data`, `ml-training`, ...).
 
 ## Cursor skills
 
-With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/branch-all`, `/checkout-main-all`, `/pull-all`, `/check-all`, `/poetry-lock-and-sync-all`, `/add-all`, `/unstage-selected`, `/commit-all-command`, `/push-all-command`, `/pr-desc-all`, `/cleanup-merged`, `/new-project`).
+With this folder as the workspace root, use skills under `.cursor/skills/` (for example `/status-all`, `/branch-all`, `/checkout-main-all`, `/pull-all`, `/check-all`, `/poetry-lock-and-sync-all`, `/add-all`, `/unstage-selected`, `/commit-all-command`, `/push-all-command`, `/pr-desc-all`, `/cleanup-merged`, `/new-project`, `/ml`). `ml open` puts this repo first in a multi-root window so those skills stay available.
 
 ## Stage repos
 
