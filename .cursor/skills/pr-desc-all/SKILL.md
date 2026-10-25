@@ -12,9 +12,9 @@ PR text only. Do **not** run `git push`, `gh pr create`, or open pull requests. 
 
 ### Scope
 
-One title + one description **body** per repository with commits ahead of `origin/main` (or repos the user scoped). Process in merge order:
+One title + one description **body** per repository with commits ahead of `origin/main` (or repos the user scoped). Emit repo sections in this logical order:
 
-`ml-infra` → `ml-data` → `ml-training` → `ml-serving` → `ml-ui` → `ml-pipeline` → `ml-meta`
+`ml-meta` → `ml-pipeline` → `ml-infra` → `ml-data` → `ml-training` → `ml-serving` → `ml-ui`
 
 ### Gather context (read-only)
 
@@ -64,7 +64,7 @@ Cross-repo features: put merge order and dependencies in **Depends on** (and opt
 
 Skip repos with no commits to describe; after all repos, one short line listing skipped names.
 
-State overall PR merge order once in prose before the first repo when multiple repos are included.
+Section order is the logical order above, not merge order. When several repos are included, state the architecture merge order once in prose before the first repo (`ml-infra` → `ml-data` → `ml-training` → `ml-serving` → `ml-ui` → `ml-pipeline`; `ml-meta` has no stage dependency).
 
 ### Output rules
 

@@ -37,7 +37,7 @@ Open the workspace at `$ML_HOMELAB_ROOT/ml-meta` so project skills under `.curso
 | Check what is staged | `bash scripts/scan-staged.sh` |
 | Copyable `git commit` per repo | skill `/commit-all-command` (messages for already-staged changes) |
 | Copyable `git push` per repo | skill `/push-all-command` (merge order; does not run push) |
-| Copyable PR markdown per repo | skill `/pr-desc-all` (does not run `gh pr create`) |
+| Copyable PR markdown per repo | skill `/pr-desc-all` (logical order: ml-meta, ml-pipeline, ml-infra, ml-data, ml-training, ml-serving, ml-ui; does not run `gh pr create`) |
 | After PRs merge: main + branch cleanup | `bash scripts/cleanup-merged.sh` (report), then `--delete`; or skill `/cleanup-merged` |
 
 Irreversible steps stay under your control: `git commit`, `git push`, and opening PRs are emitted as copyable commands, never run for you. Staging is run directly because `git restore --staged` undoes it.
