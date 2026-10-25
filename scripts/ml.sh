@@ -185,10 +185,8 @@ cmd_path() {
 	repo_path "$repo"
 }
 
-# Tabs ml term opened are marked with ML_TERM_REPO. GNOME Terminal cannot focus
-# an existing tab, so a tab whose shell is already at this repo is closed first.
 # A live screen id is what makes --tab join the current window. Dropping it
-# starts a new window instead.
+# starts a new window instead. Existing tabs are left alone.
 screen_is_live() {
 	local screen="$1"
 	[[ -n "$screen" ]] || return 1
@@ -198,82 +196,10 @@ screen_is_live() {
 		2>/dev/null | grep -F -q "'${screen}'"
 }
 
-gnome_terminal_servers() {
-	local pid exe
-	GNOME_TERMINAL_SERVERS=()
-	for pid in /proc/[0-9]*; do
-		pid="${pid#/proc/}"
-		exe="$(readlink "/proc/${pid}/exe" 2>/dev/null || true)"
-		if [[ "$exe" == */gnome-terminal-server ]]; then
-			GNOME_TERMINAL_SERVERS+=("$pid")
-		fi
-	done
-}
-
-proc_ppid() {
-	awk '/^PPid:/ { print $2 }' "/proc/$1/status" 2>/dev/null || true
-}
-
-is_terminal_tab_shell() {
-	local pid="$1"
-	local ppid server
-	ppid="$(proc_ppid "$pid")"
-	[[ -n "$ppid" ]] || return 1
-	for server in "${GNOME_TERMINAL_SERVERS[@]}"; do
-		[[ "$ppid" == "$server" ]] && return 0
-	done
-	return 1
-}
-
-proc_has_term_repo() {
-	local pid="$1"
-	local repo="$2"
-	[[ -r "/proc/${pid}/environ" ]] || return 1
-	tr '\0' '\n' <"/proc/${pid}/environ" | grep -qx "ML_TERM_REPO=${repo}"
-}
-
-# Fills TERM_TAB_PIDS with gnome-terminal tab shells for this repo.
-collect_term_tabs() {
-	local repo="$1"
-	local dir="$2"
-	local pid cwd cmd
-	TERM_TAB_PIDS=()
-	gnome_terminal_servers
-	[[ ${#GNOME_TERMINAL_SERVERS[@]} -gt 0 ]] || return 0
-	dir="$(readlink -f "$dir")"
-	for pid in /proc/[0-9]*; do
-		pid="${pid#/proc/}"
-		is_terminal_tab_shell "$pid" || continue
-		cwd="$(readlink -f "/proc/${pid}/cwd" 2>/dev/null || true)"
-		cmd="$(tr '\0' ' ' <"/proc/${pid}/cmdline" 2>/dev/null || true)"
-		if proc_has_term_repo "$pid" "$repo" ||
-			[[ "$cwd" == "$dir" ]] ||
-			[[ "$cmd" == *"term-${repo}.bash"* ]]; then
-			TERM_TAB_PIDS+=("$pid")
-		fi
-	done
-}
-
-close_term_tabs() {
-	local pid
-	[[ $# -eq 0 ]] && return 0
-	# Closing the tab we were launched from must not stop the replacement.
-	trap '' HUP
-	for pid in "$@"; do
-		kill -TERM "$pid" 2>/dev/null || true
-	done
-	sleep 0.1
-	for pid in "$@"; do
-		[[ -d "/proc/${pid}" ]] || continue
-		kill -KILL "$pid" 2>/dev/null || true
-	done
-}
-
 launch_terminal() {
-	local repo="$1"
-	local dir="$2"
-	local kind="$3"
-	local rc="$4"
+	local dir="$1"
+	local kind="$2"
+	local rc="$3"
 	local -a cmd
 	command -v gnome-terminal >/dev/null 2>&1 || {
 		echo "gnome-terminal not found" >&2
@@ -281,7 +207,7 @@ launch_terminal() {
 	}
 	cmd=(
 		gnome-terminal --tab --active --working-directory="$dir" --
-		env "ML_TERM_REPO=${repo}" bash
+		bash
 	)
 	if [[ "$kind" == "config" || "$kind" == ".venv" || "$kind" == "poetry" ]]; then
 		cmd+=(--rcfile "$rc")
@@ -291,17 +217,6 @@ launch_terminal() {
 	else
 		env -u GNOME_TERMINAL_SCREEN -u GNOME_TERMINAL_SERVICE "${cmd[@]}"
 	fi
-}
-
-# term_tab_is_new PID OLD...
-term_tab_is_new() {
-	local pid="$1"
-	local old
-	shift
-	for old in "$@"; do
-		[[ "$pid" == "$old" ]] && return 1
-	done
-	return 0
 }
 
 cmd_term() {
@@ -321,44 +236,15 @@ cmd_term() {
 	if [[ "$kind" == "config" || "$kind" == ".venv" || "$kind" == "poetry" ]]; then
 		write_term_rc "$rc" "${VENV_PATH}/bin/activate" "$report"
 	fi
-	collect_term_tabs "$repo" "$dir"
 	if [[ "$DRY_RUN" -eq 1 ]]; then
-		if [[ ${#TERM_TAB_PIDS[@]} -gt 0 ]]; then
-			printf '%-14s %-6s %s\n' "$repo" "close" "${#TERM_TAB_PIDS[@]}"
-		fi
 		if [[ "$kind" == "config" || "$kind" == ".venv" || "$kind" == "poetry" ]]; then
-			printf 'gnome-terminal --tab --active --working-directory=%q -- env ML_TERM_REPO=%q bash --rcfile %q\n' "$dir" "$repo" "$rc"
+			printf 'gnome-terminal --tab --active --working-directory=%q -- bash --rcfile %q\n' "$dir" "$rc"
 		else
-			printf 'gnome-terminal --tab --active --working-directory=%q -- env ML_TERM_REPO=%q bash\n' "$dir" "$repo"
+			printf 'gnome-terminal --tab --active --working-directory=%q -- bash\n' "$dir"
 		fi
 		return 0
 	fi
-	local old_pids=()
-	local pid opened attempt
-	if [[ ${#TERM_TAB_PIDS[@]} -gt 0 ]]; then
-		old_pids=("${TERM_TAB_PIDS[@]}")
-	fi
-	launch_terminal "$repo" "$dir" "$kind" "$rc"
-	opened=0
-	for attempt in 1 2 3 4 5; do
-		collect_term_tabs "$repo" "$dir"
-		for pid in "${TERM_TAB_PIDS[@]}"; do
-			if [[ ${#old_pids[@]} -eq 0 ]] || term_tab_is_new "$pid" "${old_pids[@]}"; then
-				opened=1
-				break
-			fi
-		done
-		[[ "$opened" -eq 1 ]] && break
-		sleep 0.1
-	done
-	if [[ "$opened" -eq 0 ]]; then
-		echo "gnome-terminal did not open a tab for ${repo}" >&2
-		return 1
-	fi
-	if [[ ${#old_pids[@]} -gt 0 ]]; then
-		printf '%-14s %-6s %s\n' "$repo" "close" "${#old_pids[@]}"
-		close_term_tabs "${old_pids[@]}"
-	fi
+	launch_terminal "$dir" "$kind" "$rc"
 }
 
 TASK_BRANCH=""

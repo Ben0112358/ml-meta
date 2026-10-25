@@ -142,7 +142,7 @@ source "$ML_HOMELAB_ROOT/ml-meta/scripts/shell/ml.bash"
 | `ml task` | Show `~/.config/ml-meta/task` |
 | `ml task set [--branch NAME] [--project NAME] [repos...]` | Write that file |
 
-`ml term` uses `gnome-terminal --tab` in the gnome-terminal window you ran it from. If that window is not available, gnome-terminal starts one. GNOME Terminal cannot focus a tab that is already open. If a tab's shell is already at that repo root, `ml term` closes that tab and opens a new one. A tab sitting in a subdirectory is left alone.
+`ml term` uses `gnome-terminal --tab` in the gnome-terminal window you ran it from. If that window is not available, gnome-terminal starts one. It always opens a new tab. Existing tabs are left alone, including a tab already at that repo.
 
 `ml open` runs `cursor -n --classic` on the workspace file. That is an editor window. It does not attach to the current agent chat.
 
