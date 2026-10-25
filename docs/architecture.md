@@ -53,7 +53,7 @@ Ports for serving and UI are derived from `md5("${PROJECT}_${MODE}")`: serving u
 
 The default boundary is one repository per stage. One explicit exception:
 
-- **ml-serving** may mount `$ML_HOMELAB_ROOT/ml-training` and install training code in non-prod Docker builds so serving can load models defined in training.
+- **ml-serving** installs `ml-training` from `$ML_WORKSPACE_ROOT/ml-training` into the serving image so it can load models defined in training. **dev** installs the local checkout copied into that workspace. **prod** installs the GitHub `main` clone. The host mount is for data, models, and logs.
 
 Changes that alter model loading or training artifacts should land in **ml-training** and **ml-serving** together, in that order.
 

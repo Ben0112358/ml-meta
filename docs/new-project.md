@@ -7,7 +7,7 @@ A **project** is the cross-repo unit of work: the same `<project_name>` in `ml-d
 1. Choose `<project_name>` (snake_case).
 2. **ml-data** — copy `src/ml_data/dummy_project` to `src/ml_data/<project_name>/`, add `Dockerfile.<project_name>` and `docker-compose.<project_name>.yaml`, add tests under `tests/`.
 3. **ml-training** — same pattern under `src/ml_training/<project_name>/`.
-4. **ml-serving** — same under `src/ml_serving/<project_name>/`. If serving imports training code, follow `investing_allocation_optimizer` compose and Dockerfile patterns.
+4. **ml-serving** — same under `src/ml_serving/<project_name>/`. The scaffolded Dockerfile installs `$ML_WORKSPACE_ROOT/ml-training`: the local copy in dev, and the GitHub `main` clone in prod.
 5. **ml-ui** — same under `src/ml_ui/<project_name>/`.
 6. **ml-infra** — only if new directories, networks, or Terraform outputs are required.
 7. **ml-pipeline** — only if orchestration or stage scripts need changes.
