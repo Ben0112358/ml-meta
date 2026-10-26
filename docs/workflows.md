@@ -44,6 +44,23 @@ Irreversible steps stay under your control: `git commit`, `git push`, and openin
 
 Skills that execute something report one short line per repository plus a summary line, rather than pasting raw script output. See [skill-reporting.md](skill-reporting.md).
 
+## Previewing with `--dry-run`
+
+The cross-repo scripts accept `--dry-run`, so you can see what a run would do before it touches any repo:
+
+- `checkout-main-all.sh`, `pull-all.sh`, and `branch-all.sh` still run their readiness checks and print the usual per-repo lines, but only log the `git checkout`, `git fetch`, `git pull`, or `git checkout -b` commands instead of running them.
+- `cleanup-merged.sh --dry-run` skips the fetch, so it classifies branches against the last fetched `origin/main`. With `--delete`, branches are listed as `WOULD DELETE` and nothing is checked out, pulled, or deleted.
+- `poetry-lock-and-sync-all.sh --dry-run` logs the `poetry lock` and `poetry sync` commands without running them.
+- `lint-all.sh --dry-run` and `test-all.sh --dry-run` report `OK (dry-run)` per repo without running any linter or test.
+
+`sync-all.sh --dry-run` passes the flag to both steps. Because the checkout step is not actually performed, the pull step reports `BLOCKED` for any repo that is not already on `main`.
+
+```bash
+bash scripts/checkout-main-all.sh --dry-run
+bash scripts/branch-all.sh my-feature --dry-run ml-data ml-training
+bash scripts/cleanup-merged.sh --delete --dry-run
+```
+
 ## Staging safety
 
 Everything staged is one commit away from being public on GitHub. `scripts/scan-staged.sh` inspects staged paths and diff content across repos and flags:
