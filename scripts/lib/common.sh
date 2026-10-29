@@ -9,7 +9,6 @@ fi
 _meta_common_loaded=1
 
 REPOS=(ml-infra ml-data ml-training ml-serving ml-ui ml-pipeline ml-meta)
-MERGE_ORDER=(ml-infra ml-data ml-training ml-serving ml-ui ml-pipeline)
 MAIN_BRANCH="main"
 
 # Untracked basenames ignored for checkout-main-all / pull-all readiness (see docs/workflows.md).
@@ -234,12 +233,6 @@ repo_ready_reason() {
 		return 0
 	fi
 	echo ""
-}
-
-repo_ready_for_pull() {
-	local reason
-	reason="$(repo_ready_reason "$1")"
-	[[ -z "$reason" ]]
 }
 
 git_has_unpushed_commits() {
