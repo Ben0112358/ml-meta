@@ -127,6 +127,14 @@ resolve_venv() {
 	fi
 }
 
+# True when resolve_venv found a venv whose activate script the terminal sources.
+venv_kind_activates() {
+	case "$1" in
+	config | .venv | poetry) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
 format_term_report() {
 	local repo="$1"
 	local kind="$2"
@@ -209,7 +217,7 @@ launch_terminal() {
 		gnome-terminal --tab --active --working-directory="$dir" --
 		bash
 	)
-	if [[ "$kind" == "config" || "$kind" == ".venv" || "$kind" == "poetry" ]]; then
+	if venv_kind_activates "$kind"; then
 		cmd+=(--rcfile "$rc")
 	fi
 	if screen_is_live "${GNOME_TERMINAL_SCREEN:-}"; then
@@ -233,11 +241,11 @@ cmd_term() {
 	report="$(format_term_report "$repo" "$kind" "$VENV_PATH")"
 	printf '%s\n' "$report"
 	rc="$(term_rc_path "$repo")"
-	if [[ "$kind" == "config" || "$kind" == ".venv" || "$kind" == "poetry" ]]; then
+	if venv_kind_activates "$kind"; then
 		write_term_rc "$rc" "${VENV_PATH}/bin/activate" "$report"
 	fi
 	if [[ "$DRY_RUN" -eq 1 ]]; then
-		if [[ "$kind" == "config" || "$kind" == ".venv" || "$kind" == "poetry" ]]; then
+		if venv_kind_activates "$kind"; then
 			printf 'gnome-terminal --tab --active --working-directory=%q -- bash --rcfile %q\n' "$dir" "$rc"
 		else
 			printf 'gnome-terminal --tab --active --working-directory=%q -- bash\n' "$dir"
@@ -273,18 +281,22 @@ read_task() {
 	done <"$file"
 }
 
+print_task() {
+	printf 'branch=%s\nproject=%s\nrepos=%s\n' "$TASK_BRANCH" "$TASK_PROJECT" "$TASK_REPOS"
+}
+
 write_task() {
 	local file
 	file="$(task_file)"
 	mkdir -p "$(dirname "$file")"
-	printf 'branch=%s\nproject=%s\nrepos=%s\n' "$TASK_BRANCH" "$TASK_PROJECT" "$TASK_REPOS" >"$file"
+	print_task >"$file"
 }
 
 cmd_task() {
 	local sub="${1:-}"
 	if [[ -z "$sub" ]]; then
 		read_task
-		printf 'branch=%s\nproject=%s\nrepos=%s\n' "$TASK_BRANCH" "$TASK_PROJECT" "$TASK_REPOS"
+		print_task
 		return 0
 	fi
 	if [[ "$sub" != "set" ]]; then
@@ -352,7 +364,7 @@ cmd_task() {
 		TASK_REPOS="${repos[*]}"
 	fi
 	write_task
-	printf 'branch=%s\nproject=%s\nrepos=%s\n' "$TASK_BRANCH" "$TASK_PROJECT" "$TASK_REPOS"
+	print_task
 }
 
 json_escape() {
@@ -383,12 +395,7 @@ set_open_repos() {
 }
 
 default_open_names() {
-	local name
-	local names=()
-	for name in "${REPOS[@]}"; do
-		names+=("$name")
-	done
-	set_open_repos "${names[@]}"
+	set_open_repos "${REPOS[@]}"
 }
 
 write_workspace() {
