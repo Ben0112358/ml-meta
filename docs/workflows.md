@@ -65,13 +65,16 @@ bash scripts/cleanup-merged.sh --delete --dry-run
 
 Everything staged is one commit away from being public on GitHub. `scripts/scan-staged.sh` inspects staged paths and diff content across repos and flags:
 
-- credentials and key material (`.env`, `*.pem`, `*.key`, `.netrc`, `*.tfvars`)
-- terraform state (`*.tfstate*`)
+- credentials and key material (`.env` and variants such as `.env.local`, `*.pem`, `*.key`, names containing `id_rsa` or `id_ed25519`)
+- tool credentials files (`.netrc`, `.npmrc`, `.pypirc`) and keystores (`*.p12`, `*.pfx`, `*.keystore`, `*.jks`)
+- paths whose name contains `credential`, `secret`, or `password`
+- terraform state (`*.tfstate*`), variables (`*.tfvars`, `*.tfvars.json`), and the generated `.terraform_envs` file
 - tokens and keys in diff content (AWS, GitHub, Slack, generic `api_key=` style assignments)
 - private key blocks
-- data and model artifacts (`*.csv`, `*.parquet`, `*.pkl`, `*.joblib`)
+- data and model artifacts (`*.csv`, `*.parquet`, `*.feather`, `*.pkl`, `*.pickle`, `*.joblib`, `*.h5`, `*.onnx`)
+- log files (`*.log`)
 - files over 1 MiB
-- absolute home paths such as `/home/<name>/`, which leak the local username
+- absolute home paths such as `/home/<name>/` or `/Users/<name>/`, which leak the local username
 
 It exits non-zero on any finding. Unstage with:
 
