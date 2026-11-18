@@ -17,6 +17,7 @@ Start at [docs/README.md](docs/README.md):
 - [Conventions](docs/conventions.md)
 - [Workflows](docs/workflows.md)
 - [New project checklist](docs/new-project.md)
+- [Skill reporting](docs/skill-reporting.md)
 
 Agent-oriented rules: [AGENTS.md](AGENTS.md).
 
@@ -34,6 +35,7 @@ bash scripts/checkout-main-all.sh
 bash scripts/pull-all.sh
 bash scripts/sync-all.sh              # checkout-main-all + pull-all
 bash scripts/branch-all.sh my-feature ml-data ml-training
+bash scripts/scaffold-project.sh my_project   # new project from dummy_project; --dry-run to preview
 bash scripts/cleanup-merged.sh    # report merged branches; --delete to remove
 bash scripts/scan-staged.sh       # flag secrets or artifacts in staged changes
 bash scripts/ml.sh status         # also path, term, open, task; see docs/workflows.md
